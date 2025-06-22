@@ -27,39 +27,55 @@ export function calculateSolarTime(lat, lon) {
 }
 
 export async function watchPosition(cb) {
-	const coords = loadCoords() || (await getCurrentPosition());
+	const coords = loadCoords(localStorage, "pos");
 
-	if (!coords) {
-		cb(false);
-
-		return;
+	if (coords) {
+		cb(coords);
 	}
 
-	storeCoords(coords);
+	navigator.geolocation.watchPosition(
+		({ coords }) => {
+			storeCoords(localStorage, "pos", coords);
 
-	cb(coords);
+			cb(coords);
+		},
+		async err => {
+			console.error(err);
+			console.log("falling back to ip location");
 
-	navigator.geolocation.watchPosition(({ coords }) => {
-		storeCoords(coords);
-
-		cb(coords);
-	});
+			cb(await getIPCoords());
+		}
+	);
 }
 
-function getCurrentPosition() {
-	return new Promise(resolve => {
-		navigator.geolocation.getCurrentPosition(
-			({ coords }) => {
-				storeCoords(coords);
+async function getIPCoords() {
+	const session = loadCoords(sessionStorage, "ip_pos");
 
-				resolve(coords);
-			},
-			() => resolve(false)
-		);
-	});
+	if (session) {
+		return session;
+	}
+
+	try {
+		const data = await fetch("http://ip-api.com/json/?fields=lat,lon").then(response => response.json());
+
+		if (!data || typeof data.lat !== "number" || typeof data.lon !== "number") {
+			throw new Error("invalid response");
+		}
+
+		const coords = {
+			latitude: data.lat,
+			longitude: data.lon,
+		};
+
+		storeCoords(sessionStorage, "ip_pos", coords)
+
+		return coords;
+	} catch {}
+
+	return false;
 }
 
-function storeCoords(coords) {
+function storeCoords(storage, key, coords) {
 	const lat = coords.latitude,
 		lon = coords.longitude;
 
@@ -67,11 +83,11 @@ function storeCoords(coords) {
 		return;
 	}
 
-	localStorage.setItem("pos", `${lat.toFixed(6)}:${lon.toFixed(6)}`);
+	storage.setItem(key, `${lat.toFixed(6)}:${lon.toFixed(6)}`);
 }
 
-function loadCoords() {
-	const pos = localStorage.getItem("pos"),
+function loadCoords(storage, key) {
+	const pos = storage.getItem(key),
 		index = pos?.indexOf(":") || -1;
 
 	if (index === -1) {
