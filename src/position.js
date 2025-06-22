@@ -13,9 +13,9 @@ export function calculateSolarTime(lat, lon) {
 		return "-:-";
 	}
 
-	const diffMillis = now.getTime() - solarNoon.getTime(),
-		solarBaseTime = new Date(Date.UTC(2000, 0, 1, 12, 0, 0)),
-		currentSolarTime = new Date(solarBaseTime.getTime() + diffMillis);
+	const currentSolarTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+
+	currentSolarTime.setTime(currentSolarTime.getTime() + now.getTime() - solarNoon.getTime());
 
 	const formatter = new Intl.DateTimeFormat("en-US", {
 		hour: "numeric",
