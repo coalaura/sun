@@ -56,18 +56,27 @@ async function getIPCoords() {
 	}
 
 	try {
-		const data = await fetch("http://ip-api.com/json/?fields=lat,lon").then(response => response.json());
+		const data = await fetch("https://ipinfo.io/json").then(response => response.json()),
+			loc = data?.loc,
+			index = loc?.indexOf(",") || -1;
 
-		if (!data || typeof data.lat !== "number" || typeof data.lon !== "number") {
+		if (!loc || index === -1) {
 			throw new Error("invalid response");
 		}
 
+		const lat = parseFloat(loc.substring(0, index)),
+			lon = parseFloat(loc.substring(index + 1));
+
+		if (Number.isNaN(lat) || Number.isNaN(lon)) {
+			throw new Error("invalid location");
+		}
+
 		const coords = {
-			latitude: data.lat,
-			longitude: data.lon,
+			latitude: lat,
+			longitude: lon,
 		};
 
-		storeCoords(sessionStorage, "ip_pos", coords)
+		storeCoords(sessionStorage, "ip_pos", coords);
 
 		return coords;
 	} catch {}
