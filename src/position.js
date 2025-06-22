@@ -1,12 +1,12 @@
-import SunCalc from "suncalc";
+import { getPosition, getTimes } from "suncalc";
 
 export function calculateSolarAngle(lat, lon) {
-	return SunCalc.getPosition(new Date(), lat, lon).altitude * (180 / Math.PI);
+	return getPosition(new Date(), lat, lon).altitude * (180 / Math.PI);
 }
 
 export function calculateSolarTime(lat, lon) {
 	const now = new Date(),
-		times = SunCalc.getTimes(now, lat, lon),
+		times = getTimes(now, lat, lon),
 		solarNoon = times.solarNoon;
 
 	if (!solarNoon) {

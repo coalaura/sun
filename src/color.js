@@ -194,8 +194,15 @@ function interpolateColors(color1, color2, factor) {
 	return `rgb(${r}, ${g}, ${b})`;
 }
 
+function wrapAngle(angle) {
+	if (angle >= 180) return angle - 360;
+	if (angle <= -180) return angle + 360;
+
+	return angle;
+}
+
 export function estimateSkyColor(angle) {
-	const altitude = 90 * Math.sin(angle * (Math.PI / 180)),
+	const altitude = 90 * Math.sin(wrapAngle(angle) * (Math.PI / 180)),
 		index = altitude + 90;
 
 	const floor = Math.floor(index),
