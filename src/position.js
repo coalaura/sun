@@ -1,7 +1,7 @@
 import { getPosition, getTimes } from "suncalc";
 
-export function calculateSolarAngle(lat, lon) {
-	return getPosition(new Date(), lat, lon).altitude * (180 / Math.PI);
+export function calculateSolarAngle(now, lat, lon) {
+	return getPosition(now, lat, lon).altitude * (180 / Math.PI);
 }
 
 export function calculateSolarTime(lat, lon) {

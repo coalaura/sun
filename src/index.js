@@ -29,7 +29,13 @@ watchPosition(pos => {
 render(() => {
 	if (!coords) return;
 
-	const angle = calculateSolarAngle(coords.latitude, coords.longitude),
+	const now = new Date(),
+		minus30 = new Date(now.getTime() - (30 * 60 * 1000)),
+		plus30 = new Date(now.getTime() + (30 * 60 * 1000));
+
+	const angle = calculateSolarAngle(now, coords.latitude, coords.longitude),
+		m30 = calculateSolarAngle(minus30, coords.latitude, coords.longitude),
+		p30 = calculateSolarAngle(plus30, coords.latitude, coords.longitude),
 		time = calculateSolarTime(coords.latitude, coords.longitude);
 
 	updateStarsOpacity($stars, angle);
@@ -37,8 +43,8 @@ render(() => {
 	$time.innerText = Names[Math.round(angle)];
 	$info.innerHTML = `<div>${angle.toFixed(4)}°</div><div>${time}</div>`;
 
-	const before = estimateSkyColor(angle - 0.8),
-		after = estimateSkyColor(angle + 0.8);
+	const before = estimateSkyColor(m30),
+		after = estimateSkyColor(p30);
 
 	$body.style.background = `linear-gradient(to bottom, ${before} 0%, ${after} 100%)`;
 });
